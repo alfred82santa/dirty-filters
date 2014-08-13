@@ -11,6 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   dirty_filters.rst
+
+.. include:: ../../README.rst
+
 
 
 Indices and tables
