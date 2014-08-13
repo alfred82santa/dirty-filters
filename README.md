@@ -1,4 +1,0 @@
-dirty-filters
-=============
-
-Agnostic filters
