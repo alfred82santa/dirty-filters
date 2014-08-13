@@ -26,6 +26,7 @@ class BaseFilterTest(TestCase):
 
 
 class IntegerFilterTest(TestCase):
+
     def setUp(self):
         self.filter = IntegerFilter()
 
@@ -52,6 +53,7 @@ class IntegerFilterTest(TestCase):
 
 
 class FloatFilterTest(TestCase):
+
     def setUp(self):
         self.filter = FloatFilter()
 
@@ -78,6 +80,7 @@ class FloatFilterTest(TestCase):
 
 
 class StringFilterTest(TestCase):
+
     def setUp(self):
         self.filter = StringFilter()
 
@@ -95,5 +98,3 @@ class StringFilterTest(TestCase):
 
     def test_filter_list(self):
         self.assertEqual("[]", self.filter([]))
-
-

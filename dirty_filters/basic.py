@@ -128,6 +128,7 @@ class RemoveStr(BaseFilter):
 
 
 class ReplaceStr(BaseFilter):
+
     def __init__(self, str_replace=None, count=None, *args, **kwargs):
         super(RemoveStr, self).__init__(*args, **kwargs)
         self._str_replace = str_replace if str_replace is not None else {}
@@ -149,8 +150,3 @@ class RegexReplaceStr(ReplaceStr):
             value = re.sub(regx, replace_val, count=self._count)
 
         return value
-
-
-
-
-
