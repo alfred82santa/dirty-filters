@@ -1,8 +1,11 @@
 from datetime import date, datetime, time
 from functools import wraps
+import logging
 import re
 
 __author__ = 'alfred'
+
+logger = logging.getLogger('dirty-filters')
 
 
 def fallback_none(func):
@@ -11,7 +14,8 @@ def fallback_none(func):
     def inner_func(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except (ValueError, TypeError, AttributeError):
+        except (ValueError, TypeError, AttributeError) as ex:
+            logger.debug(ex)
             return None
 
     return inner_func
@@ -63,17 +67,17 @@ class ToDateTimeFilter(BaseDateTimeFilter):
         elif isinstance(value, str):
             return datetime.strptime(value, self._parse_format)
         else:
-            return datetime(value)
+            return datetime.utcfromtimestamp(value)
 
 
 class ToDateFilter(ToDateTimeFilter):
 
     @fallback_none
     def __call__(self, value, *args, **kwargs):
-        if isinstance(value, date):
+        if type(value) is date:
             return value
 
-        return super(ToDateFilter, self).__call__(value, *args, **kwargs).date
+        return super(ToDateFilter, self).__call__(value, *args, **kwargs).date()
 
 
 class ToTimeFilter(ToDateTimeFilter):
@@ -83,14 +87,14 @@ class ToTimeFilter(ToDateTimeFilter):
         if isinstance(value, time):
             return value
 
-        return super(ToTimeFilter, self).__call__(value, *args, **kwargs).time
+        return super(ToTimeFilter, self).__call__(value, *args, **kwargs).time()
 
 
 class DateTimeToStrFilter(BaseDateTimeFilter):
 
     @fallback_none
     def __call__(self, value, *args, **kwargs):
-        return value.strftime(value, self._parse_format)
+        return value.strftime(self._parse_format)
 
 
 class DateToStrFilter(DateTimeToStrFilter):
@@ -114,7 +118,7 @@ class Strip(BaseFilter):
 
 class RemoveStr(BaseFilter):
 
-    def __init__(self, strings=None, count=None, *args, **kwargs):
+    def __init__(self, strings=None, count=-1, *args, **kwargs):
         super(RemoveStr, self).__init__(*args, **kwargs)
         self._strings = strings if strings is not None else []
         self._count = count
@@ -129,8 +133,8 @@ class RemoveStr(BaseFilter):
 
 class ReplaceStr(BaseFilter):
 
-    def __init__(self, str_replace=None, count=None, *args, **kwargs):
-        super(RemoveStr, self).__init__(*args, **kwargs)
+    def __init__(self, str_replace=None, count=-1, *args, **kwargs):
+        super(ReplaceStr, self).__init__(*args, **kwargs)
         self._str_replace = str_replace if str_replace is not None else {}
         self._count = count
 
@@ -144,9 +148,15 @@ class ReplaceStr(BaseFilter):
 
 class RegexReplaceStr(ReplaceStr):
 
+    def __init__(self, str_replace=None, count=0, *args, **kwargs):
+        super(RegexReplaceStr, self).__init__(str_replace=str_replace, count=count, *args, **kwargs)
+
     @fallback_none
     def __call__(self, value, *args, **kwargs):
         for regx, replace_val in self._str_replace.items():
-            value = re.sub(regx, replace_val, count=self._count)
+            value = re.sub(regx, replace_val, value, count=self._count)
+            logger.debug("Applying pattern '{0}' to {1} and substitute it by '{2}'".format(regx,
+                                                                                           value,
+                                                                                           replace_val))
 
         return value

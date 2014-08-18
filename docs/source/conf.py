@@ -345,4 +345,3 @@ epub_exclude_files = ['search.html']
 intersphinx_mapping = {'http://docs.python.org/': None}
 
 autodoc_member_order = 'bysource'
-
